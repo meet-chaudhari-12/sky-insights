@@ -1081,112 +1081,131 @@
   opacity: 1;
 }
 
-.history-btn {
-  border: none;
-  background: white;
-  padding: 8px 16px;
-  border-radius: 999px;
+
+/* Add this at the end of Home.css */
+
+.quick-lists-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.clear-history-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
-  font-weight: 600;
-  color: #333;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
 }
 
-.history-btn:hover:not(:disabled) {
-  background: #f0f0f0;
-  transform: scale(1.05);
+.clear-history-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 
-.history-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-/* --- FINAL: Historical Weather Card Styles --- */
-.historical-weather-section {
+/* === CHART STYLES === */
+
+.temperature-graph {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
-  padding: 30px 40px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  padding: 28px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  max-width: 800px;
-  margin: 40px auto 0 auto; /* Adds space above the card */
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 40px; /* Adds space between chart and cards below */
+}
+
+.graph-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 24px 0;
   text-align: center;
 }
 
-.historical-weather-section .section-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0 0 8px 0;
+.graph-container {
+  position: relative;
+  height: 250px; /* You can adjust this height */
 }
 
-.historical-weather-section .section-subtitle {
-  font-size: 1rem;
-  color: #666;
-  margin-bottom: 24px;
-}
+/* === PROMO BANNER === */
 
-.historical-weather-section .historical-picker {
+.promo-banner {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 24px;
+  margin: 0 auto;
+  max-width: 800px;
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background-color: #f1f5f9;
-  border-radius: 12px;
-  padding: 12px;
-  max-width: 400px;
-  margin: 0 auto;
-  border: 1px solid #e2e8f0;
-}
-
-.historical-weather-section .date-input {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  color: #333;
-  font-weight: 500;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.historical-weather-section .date-input::-webkit-calendar-picker-indicator {
-  filter: none;
-  opacity: 0.6;
-  cursor: pointer;
-}
-
-.historical-weather-section .history-btn {
-  border: none;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
-  padding: 9px 20px;
-  border-radius: 8px;
+  margin-bottom: 40px;
+}
+
+.promo-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.promo-content p {
+  margin: 0;
+  opacity: 0.9;
+  max-width: 400px;
+}
+
+.promo-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.promo-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease;
 }
 
-.historical-weather-section .history-btn:hover:not(:disabled) {
+.promo-btn.login {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+.promo-btn.login:hover {
+  background-color: white;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-.historical-weather-section .history-btn:disabled {
-  background: #94a3b8;
-  opacity: 0.7;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
+.promo-btn.signup {
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
 }
 
-.history-helper {
-  margin-top: 6px;
-  margin-left: 35px;
-  font-size: 0.90rem;
-  color: #000000;
-  font-style: italic;
+.promo-btn.signup:hover {
+  background-color: white;
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+  .promo-banner {
+    flex-direction: column;
+    text-align: center;
+  }
 }

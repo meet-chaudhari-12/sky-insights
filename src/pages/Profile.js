@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Profile.css"; 
 import { useNavigate } from "react-router-dom";
 import { getUserDetails, setHomeLocation, removeHistory } from "../api";
+import { removeHistoryItem } from "../utils/storage";
 
 function Profile() {
   const [userDetails, setUserDetails] = useState(null);
@@ -44,6 +45,7 @@ function Profile() {
   const handleRemoveHistory = async (city) => {
     const updatedHistory = await removeHistory(city);
     if (Array.isArray(updatedHistory)) {
+      removeHistoryItem(city);
       setUserDetails(prevDetails => ({ ...prevDetails, history: updatedHistory }));
     } else {
       alert("Failed to remove city from history. Please try again.");

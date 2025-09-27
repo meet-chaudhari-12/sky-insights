@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute"; // Import the new component
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -25,6 +26,10 @@ function App() {
               <Profile />
             </ProtectedRoute>
           } 
+        />
+        <Route 
+          path="/dashboard" 
+          element={<ProtectedRoute><Dashboard /></ProtectedRoute>} 
         />
       </Routes>
     </Router>

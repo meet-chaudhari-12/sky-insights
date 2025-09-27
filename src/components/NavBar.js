@@ -37,6 +37,13 @@ const Navbar = () => {
           {user ? (
             // Links to show if the user IS logged in
             <>
+            <Link 
+        to="/dashboard" 
+        className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+      >
+        <span className="nav-icon">📊</span>
+        <span className="nav-text">Dashboard</span>
+      </Link>
               <Link 
                 to="/profile" 
                 className={`nav-link ${location.pathname === '/profile' ? 'active' : ''}`}

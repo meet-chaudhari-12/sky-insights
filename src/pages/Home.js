@@ -2,9 +2,13 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import '../App.css';
 import './Home.css';
 import React from 'react';
-import HistoricalWeatherModal from '../components/HistoricalWeatherModal';
-import { getHistory as getLocalHistory, pushHistory as pushLocalHistory } from '../utils/storage';
+import { getHistory as getLocalHistory, pushHistory as pushLocalHistory, clearHistory } from '../utils/storage';
+
 import { getFavorites, addFavorite, removeFavorite, getHistory as getApiHistory, addHistory as addApiHistory } from '../api';
+import HourlyChart from '../components/HourlyChart';
+import DailyChart from '../components/DailyChart';
+
+import { useNavigate } from 'react-router-dom';
 
 // Helper function to format time
 const formatTime = (timestamp) => {
@@ -74,15 +78,12 @@ function Home() {
   const [favorites, setFavorites] = useState([]);
   const [history, setHistory] = useState([]);
   const [units, setUnits] = useState('metric');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [historicalWeather, setHistoricalWeather] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [historicalLoading, setHistoricalLoading] = useState(false);
   const [coords, setCoords] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const searchContainerRef = useRef(null);
   const isLoggedIn = !!localStorage.getItem('token');
 
+  const navigate = useNavigate();
   useEffect(() => {
     if (!isLoggedIn) {
       setHistory(getLocalHistory());
@@ -208,7 +209,15 @@ function Home() {
   };
 
   const handleSearch = () => { fetchCoordsByCity(city); };
-  
+  const handleClearHistory = () => {
+  if (!isLoggedIn) {
+    clearHistory(); // Clears from local storage
+    setHistory([]); // Clears from the screen
+  }
+  clearHistory();
+  setHistory([]);
+  // If you want to add this for logged-in users later, you'd add an API call here.
+};
   const handleChipClick = (cityName) => {
     setCity(cityName);
     fetchCoordsByCity(cityName);
@@ -242,55 +251,6 @@ function Home() {
     }
   };
 
-  const fetchHistoricalWeather = async () => {
-    // Safety check to prevent crash if coords are not ready
-    if (!selectedDate || !coords) return;
-    
-    setHistoricalWeather(null); 
-    setHistoricalLoading(true);
-    setIsModalOpen(true); // Open the modal immediately
-
-    const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
-    const dateTimestamp = Math.floor(new Date(selectedDate).getTime() / 1000);
-    const historicalUrl = `https://api.openweathermap.org/data/2.5/onecall/timemachine?lat=${coords.lat}&lon=${coords.lon}&dt=${dateTimestamp}&appid=${apiKey}&units=${units}`;
-    
-    try {
-      const res = await fetch(historicalUrl);
-      const result = await res.json();
-      
-      const hourlyData = result.data;
-      if (Array.isArray(hourlyData) && hourlyData.length > 0) {
-        // Correctly calculate averages from the hourly data
-        const totalTemp = hourlyData.reduce((sum, hour) => sum + hour.temp, 0);
-        const avgTemp = totalTemp / hourlyData.length;
-        const totalHumidity = hourlyData.reduce((sum, hour) => sum + hour.humidity, 0);
-        const avgHumidity = totalHumidity / hourlyData.length;
-        const totalWind = hourlyData.reduce((sum, hour) => sum + hour.wind_speed, 0);
-        const avgWind = totalWind / hourlyData.length;
-        const conditions = hourlyData.map(hour => hour.weather[0].main);
-        const modeCondition = conditions.sort((a,b) =>
-              conditions.filter(v => v===a).length
-            - conditions.filter(v => v===b).length
-        ).pop();
-
-        const dailySummary = {
-            temp: avgTemp,
-            humidity: avgHumidity,
-            wind_speed: avgWind,
-            weather: [{ main: modeCondition }],
-        };
-        // Set the calculated summary to be passed to the modal
-        setHistoricalWeather(dailySummary);
-      } else {
-        setHistoricalWeather(null);
-      }
-    } catch (err) {
-      console.error("Failed to fetch historical data", err);
-      setHistoricalWeather(null);
-    } finally {
-      setHistoricalLoading(false);
-    }
-  };
 
   const getWeatherEmoji = (main) => {
     switch (main.toLowerCase()) {
@@ -353,15 +313,16 @@ function Home() {
             )}
             
             {history.length > 0 && (
-              <div className="quick-lists">
-                <span className="quick-lists-label">Recent:</span>
-                <div className="chips">
-                  {history.slice(0, 5).map((c) => (
-                    <button key={c} className="chip" onClick={() => handleChipClick(c)}>{c}</button>
-                  ))}
-                </div>
-              </div>
-            )}
+  <div className="quick-lists">
+    <span className="quick-lists-label">Recent:</span>
+    <div className="chips">
+      {history.slice(0, 5).map((c) => (
+        <button key={c} className="chip" onClick={() => handleChipClick(c)}>{c}</button>
+      ))}
+    </div>
+    <button onClick={handleClearHistory} className="clear-history-btn">Clear All</button>
+  </div>
+)}
 
             {/* MOVED the historical picker back here */}
             {/* Historical weather trigger */}
@@ -380,13 +341,6 @@ function Home() {
       °F
     </button>
   </div>
-  <button
-    className="history-btn"
-    onClick={() => setIsModalOpen(true)} // just opens modal now
-    disabled={!weather}
-  >
-    📜 View History
-  </button>
 </div>
 
           </div>
@@ -400,6 +354,18 @@ function Home() {
         {!loading && weather && (
           <>
             <div className="current-weather">
+              {!isLoggedIn && (
+              <div className="promo-banner">
+                <div className="promo-content">
+                  <h3>Unlock More Features!</h3>
+                  <p>Sign up or log in to save your favorite cities, save your search history, set a home location and view all your favourite cities weather at one place.</p>
+                </div>
+                <div className="promo-actions">
+                  <button onClick={() => navigate('/login')} className="promo-btn login">Login</button>
+                  <button onClick={() => navigate('/signup')} className="promo-btn signup">Sign Up</button>
+                </div>
+              </div>
+            )}
               <div className="main-weather-card">
                 <div className="weather-header">
                   <div className="location">
@@ -447,6 +413,11 @@ function Home() {
                   </div>
                 </div>
                 {activeTab === 'daily' && (
+                  <>
+                  <DailyChart 
+      dailyData={forecast.filter((_, index) => index % 8 === 0).slice(0, 7)} 
+      tempUnit={tempUnitLetter} 
+    />
                   <div className="forecast-grid">
                     {forecast.filter((_, index) => index % 8 === 0).slice(0, 7).map((item, idx) => (
                       <div key={idx} className="forecast-card">
@@ -461,6 +432,7 @@ function Home() {
                       </div>
                     ))}
                   </div>
+                  </>
                 )}
                 {activeTab === 'hourly' && (
                   <div className="hourly-forecast">
@@ -486,19 +458,31 @@ function Home() {
                         </div>
                       </div>
                     </div>
-                    <div className="hourly-cards">
-                      {hourlyForecast.slice(0, 8).map((item, idx) => (
-                        <div key={idx} className="hourly-card">
-                          <p className="hourly-time">{new Date(item.dt_txt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                          <div className="hourly-icon">{getWeatherEmoji(item.weather[0].main)}</div>
-                          <p className="hourly-temp">{Math.round(item.main.temp)}°{tempUnitLetter}</p>
-                          <div className="hourly-pop">
-                            <span>Rain: 💧</span>
-                            <span>{Math.round(item.pop * 100)}%</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    {activeTab === 'hourly' && (
+  <div className="hourly-forecast">
+    
+    {/* 1. The 24-hour graph component */}
+    <HourlyChart hourlyData={hourlyForecast.slice(0, 24)} tempUnit={tempUnitLetter} />
+
+    {/* 2. The individual hourly cards */}
+    <div className="hourly-cards">
+      {hourlyForecast.slice(0, 8).map((item, idx) => (
+        <div key={idx} className="hourly-card">
+          <p className="hourly-time">{new Date(item.dt_txt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          <div className="hourly-icon">
+            {getWeatherEmoji(item.weather[0].main)}
+          </div>
+          <p className="hourly-temp">{Math.round(item.main.temp)}°{tempUnitLetter}</p>
+          <div className="hourly-pop">
+            <span>Rain: 💧</span>
+            <span>{Math.round(item.pop * 100)}%</span>
+          </div>
+        </div>
+      ))}
+    </div>
+    
+  </div>
+)}
                   </div>
                 )}
               </div>
@@ -507,13 +491,6 @@ function Home() {
         )}
       </div>
 
-      {isModalOpen && (
-  <HistoricalWeatherModal
-    coords={coords}                // ✅ pass coords here
-    onClose={() => setIsModalOpen(false)}
-    units={units}
-  />
-)}
     </div>
   );
 }

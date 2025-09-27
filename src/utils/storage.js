@@ -51,4 +51,11 @@ export const clearHistory = () => {
   } catch (_) {}
 };
 
-
+export const removeHistoryItem = (cityName) => {
+  const list = getHistory();
+  const next = list.filter((c) => c.toLowerCase() !== cityName.toLowerCase());
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+  } catch (_) {}
+  return next;
+};
